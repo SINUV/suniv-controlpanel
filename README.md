@@ -56,6 +56,14 @@ Para crear una versión optimizada para producción:
 npm run build
 ```
 
+Si vas a desplegar, compila con la URL real del backend para evitar que el frontend intente llamar a `localhost` del navegador del usuario:
+
+```bash
+VITE_API_BASE_URL=https://tu-backend.com npm run build
+```
+
+Si frontend y backend viven en el mismo dominio, no necesitas esa variable: en produccion se usara automaticamente el mismo origen del sitio desplegado.
+
 Para previsualizar la versión compilada:
 ```bash
 npm run preview
