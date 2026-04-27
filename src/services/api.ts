@@ -11,6 +11,20 @@ import {
 class ApiService {
   private axiosInstance: AxiosInstance;
 
+  private normalizeEstado(value?: string): InscripcionStatus['estado'] {
+    const estado = (value ?? '').toString().trim().toLowerCase();
+
+    const map: Record<string, InscripcionStatus['estado']> = {
+      pendiente: 'Pendiente',
+      inscrito: 'Inscrito',
+      aprobado: 'Aprobado',
+      rechazado: 'Rechazado',
+      cancelado: 'Cancelado',
+    };
+
+    return map[estado] ?? 'Pendiente';
+  }
+
   private unwrapResponseData<T>(payload: any): T {
     return (payload?.data ?? payload) as T;
   }
@@ -46,7 +60,7 @@ class ApiService {
 
     return {
       folio: payload.folio ?? folio,
-      estado: payload.estado ?? payload.estado_aspirante ?? 'Pendiente',
+      estado: this.normalizeEstado(payload.estado ?? payload.estado_aspirante),
       nombreCompleto: payload.nombre_completo,
       correo: payload.correo,
       telefono: payload.aspirante?.telefono,
@@ -72,7 +86,7 @@ class ApiService {
       campus: payload.campus,
       lugarExamen: payload.lugarExamen,
       horaExamen: payload.horaExamen,
-      estado: payload.estado ?? payload.estado_aspirante ?? 'Pendiente',
+      estado: this.normalizeEstado(payload.estado ?? payload.estado_aspirante),
       fechaInscripcion: payload.fechaInscripcion,
       fechaExamen: payload.fechaExamen,
       fechaActualizacion: payload.fechaActualizacion,
@@ -88,7 +102,13 @@ class ApiService {
       `/api/Admision/estado/${folio}`,
       request
     );
-    return response.data;
+    const payload = response.data ?? {};
+
+    return {
+      folio: payload.folio ?? folio,
+      estado: this.normalizeEstado(payload.estado ?? payload.estadoActual ?? request.estado),
+      mensaje: payload.mensaje ?? payload.message,
+    };
   }
 
   // Aprobar inscripción (PATCH)
@@ -96,7 +116,13 @@ class ApiService {
     const response = await this.axiosInstance.patch(
       `/api/Inscripciones/aspirante/${folio}/aprobar`
     );
-    return response.data;
+    const payload = response.data ?? {};
+
+    return {
+      folio,
+      estado: this.normalizeEstado(payload.estado ?? payload.estadoActual ?? 'Aprobado'),
+      mensaje: payload.mensaje ?? payload.message,
+    };
   }
 
   // Obtener todos los folios disponibles
@@ -126,7 +152,7 @@ class ApiService {
 
         return {
           folio: String(folio),
-          estado: item?.estado ?? item?.estado_aspirante,
+          estado: this.normalizeEstado(item?.estado ?? item?.estado_aspirante),
           nombre,
           correo: item?.correo ?? item?.email,
         };
