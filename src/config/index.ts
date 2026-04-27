@@ -1,5 +1,6 @@
 // En desarrollo usamos localhost por defecto; en produccion usamos el mismo origen si no hay variable.
 const envBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+const envFoliosEndpoint = import.meta.env.VITE_API_FOLIOS_ENDPOINT?.trim();
 const DEFAULT_LOCAL_API = 'http://localhost:5249';
 
 const API_BASE_URL =
@@ -14,4 +15,5 @@ if (!envBaseUrl && import.meta.env.PROD) {
 
 export const config = {
   apiBaseUrl: API_BASE_URL,
+  foliosEndpoint: envFoliosEndpoint || null,
 };

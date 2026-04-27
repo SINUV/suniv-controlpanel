@@ -101,60 +101,37 @@ class ApiService {
 
   // Obtener todos los folios disponibles
   async obtenerFolios(): Promise<FolioResumen[]> {
-    const endpoints = [
-      '/api/Inscripciones/consulta/folios',
-      '/api/Inscripciones/folios',
-      '/api/Inscripciones/consulta',
-      '/api/Inscripciones',
-      '/api/Admision/fichas',
-    ];
-
-    let lastError: unknown = null;
-
-    for (const endpoint of endpoints) {
-      try {
-        const response = await this.axiosInstance.get(endpoint);
-        const payload = this.unwrapResponseData<any>(response.data);
-        const rawItems: any[] = Array.isArray(payload)
-          ? payload
-          : Array.isArray(payload?.items)
-            ? payload.items
-            : Array.isArray(payload?.result)
-              ? payload.result
-              : [];
-
-        if (!Array.isArray(rawItems) || rawItems.length === 0) {
-          continue;
-        }
-
-        const normalized = rawItems
-          .map((item: any): FolioResumen | null => {
-            const folio = item?.folio ?? item?.idFolio ?? item?.numeroFolio;
-
-            if (!folio) return null;
-
-            const fullName = [item?.nombre, item?.apellido].filter(Boolean).join(' ');
-            const nombre = item?.nombreCompleto ?? item?.nombre ?? (fullName || undefined);
-
-            return {
-              folio: String(folio),
-              estado: item?.estado ?? item?.estado_aspirante,
-              nombre,
-              correo: item?.correo ?? item?.email,
-            };
-          })
-          .filter((item): item is FolioResumen => item !== null);
-
-        if (normalized.length > 0) {
-          return normalized;
-        }
-      } catch (error) {
-        lastError = error;
-      }
+    if (!config.foliosEndpoint) {
+      return [];
     }
 
-    if (lastError) throw lastError;
-    return [];
+    const response = await this.axiosInstance.get(config.foliosEndpoint);
+    const payload = this.unwrapResponseData<any>(response.data);
+    const rawItems: any[] = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.items)
+        ? payload.items
+        : Array.isArray(payload?.result)
+          ? payload.result
+          : [];
+
+    return rawItems
+      .map((item: any): FolioResumen | null => {
+        const folio = item?.folio ?? item?.idFolio ?? item?.numeroFolio;
+
+        if (!folio) return null;
+
+        const fullName = [item?.nombre, item?.apellido].filter(Boolean).join(' ');
+        const nombre = item?.nombreCompleto ?? item?.nombre ?? (fullName || undefined);
+
+        return {
+          folio: String(folio),
+          estado: item?.estado ?? item?.estado_aspirante,
+          nombre,
+          correo: item?.correo ?? item?.email,
+        };
+      })
+      .filter((item): item is FolioResumen => item !== null);
   }
 }
 

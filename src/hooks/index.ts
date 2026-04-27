@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiService } from '../services/api';
+import { config } from '../config';
 import {
   CambiarEstadoRequest,
   CambiarEstadoResponse,
@@ -72,7 +73,8 @@ export const useObtenerFolios = () => {
   return useQuery<FolioResumen[]>({
     queryKey: ['folios'],
     queryFn: async () => apiService.obtenerFolios(),
-    retry: 1,
+    enabled: !!config.foliosEndpoint,
+    retry: 0,
     staleTime: 1000 * 60 * 2,
   });
 };

@@ -20,6 +20,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useObtenerFolios } from '../hooks';
 import { Estado } from '../types';
+import { config } from '../config';
 
 const getEstadoColor = (estado?: Estado) => {
   const colors: Record<Estado, 'default' | 'primary' | 'success' | 'error' | 'warning'> = {
@@ -156,19 +157,25 @@ export const SearchPage = () => {
               size="small"
               startIcon={isFetching ? <CircularProgress size={14} /> : <RefreshIcon />}
               onClick={() => refetch()}
-              disabled={isFetching}
+              disabled={isFetching || !config.foliosEndpoint}
             >
               Actualizar lista
             </Button>
           </Box>
 
-          {isLoading && (
+          {!config.foliosEndpoint && (
+            <Alert severity="info" sx={{ mt: 1 }}>
+              El listado automático está desactivado. Define VITE_API_FOLIOS_ENDPOINT en tu .env con el endpoint real para cargar todos los folios.
+            </Alert>
+          )}
+
+          {config.foliosEndpoint && isLoading && (
             <Box sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
               <CircularProgress />
             </Box>
           )}
 
-          {foliosError && (
+          {config.foliosEndpoint && foliosError && (
             <Alert severity="error" sx={{ mt: 2 }}>
               {typeof foliosError === 'string'
                 ? foliosError
@@ -176,13 +183,13 @@ export const SearchPage = () => {
             </Alert>
           )}
 
-          {!isLoading && !foliosError && filteredFolios.length === 0 && (
+          {config.foliosEndpoint && !isLoading && !foliosError && filteredFolios.length === 0 && (
             <Alert severity="info" sx={{ mt: 2 }}>
               No hay folios para mostrar con el filtro actual.
             </Alert>
           )}
 
-          {!isLoading && !foliosError && filteredFolios.length > 0 && (
+          {config.foliosEndpoint && !isLoading && !foliosError && filteredFolios.length > 0 && (
             <List sx={{ maxHeight: 360, overflow: 'auto', mt: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
               {filteredFolios.map((item, index) => (
                 <ListItem
