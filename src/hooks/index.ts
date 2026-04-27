@@ -1,6 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiService } from '../services/api';
-import { CambiarEstadoRequest, CambiarEstadoResponse, FichaAspirante, InscripcionStatus } from '../types';
+import {
+  CambiarEstadoRequest,
+  CambiarEstadoResponse,
+  FichaAspirante,
+  FolioResumen,
+  InscripcionStatus,
+} from '../types';
 
 // Hook para consultar el status de una inscripción
 export const useConsultarStatus = (folio: string | null, enabled: boolean = true) => {
@@ -58,5 +64,15 @@ export const useAprobarInscripcion = () => {
       queryClient.invalidateQueries({ queryKey: ['status', folio] });
       queryClient.invalidateQueries({ queryKey: ['ficha', folio] });
     },
+  });
+};
+
+// Hook para obtener todos los folios
+export const useObtenerFolios = () => {
+  return useQuery<FolioResumen[]>({
+    queryKey: ['folios'],
+    queryFn: async () => apiService.obtenerFolios(),
+    retry: 1,
+    staleTime: 1000 * 60 * 2,
   });
 };

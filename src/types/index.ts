@@ -29,6 +29,14 @@ export interface FichaAspirante {
   fechaActualizacion?: string;
 }
 
+// Item de listado para mostrar folios y navegación a detalle
+export interface FolioResumen {
+  folio: string;
+  estado?: Estado;
+  nombre?: string;
+  correo?: string;
+}
+
 // Request para cambiar estado
 export interface CambiarEstadoRequest {
   estado: Estado;
